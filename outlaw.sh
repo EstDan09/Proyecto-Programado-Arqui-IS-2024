@@ -4,10 +4,10 @@ if [ -f Outlaw ]; then
 fi
 
 # Build new
-gcc game.c -o Outlaw -Wno-unused -lncurses
+gcc outlaw.c -o Outlaw -Wno-unused -lncurses
 
 # Run
 ./Outlaw
 
-#chmod +x game.sh
+#chmod +x outlaw.sh
 #./game.sh

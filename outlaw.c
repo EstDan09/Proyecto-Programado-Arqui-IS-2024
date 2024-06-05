@@ -1,3 +1,17 @@
+/***
+ * 
+ * OUTLAW
+ * Arquitectura de Computadores IC-3101
+ * Proyecto Final - Fase 2
+ * Grupo 02
+ * Fabian Araya
+ * Binjie Liang
+ * Alejandro Madrial
+ * Esteban Secaida
+ * 
+*/
+
+
 // includes
 #include <stdio.h>
 #include <string.h>
@@ -9,10 +23,10 @@
 #define vk_enter  10
 #define vk_f 102
 int key_pressed = 0;
-#define KEY_W 119 // ASCII value for 'w'
-#define KEY_A 97  // ASCII value for 'a'
-#define KEY_S 115 // ASCII value for 's'
-#define KEY_D 100 // ASCII value for 'd'
+#define KEY_W 119 // ASCII para'w'
+#define KEY_A 97  // ASCII para 'a'
+#define KEY_S 115 // ASCII para 's'
+#define KEY_D 100 // ASCII para 'd'
 
 //colores
 const short c_wall   = 1;
@@ -345,16 +359,16 @@ short lvl_last[lvl_last_y][lvl_last_x] = {
 */
 void SetColor() {
     start_color();
-    init_pair(c_wall,   COLOR_BLUE,     COLOR_BLACK);
-    init_pair(c_space,  COLOR_BLACK,    COLOR_BLACK);
-    init_pair(c_life,   COLOR_GREEN,    COLOR_BLACK);
-    init_pair(c_life2,   COLOR_GREEN,    COLOR_BLACK);
-    init_pair(c_player, COLOR_MAGENTA,  COLOR_BLACK);
-    init_pair(c_player2,COLOR_WHITE,    COLOR_BLACK);
-    init_pair(c_bullet, COLOR_GREEN,    COLOR_BLACK);
-    init_pair(c_bullet2, COLOR_GREEN,    COLOR_BLACK);
-    init_pair(c_enemy,  COLOR_RED,      COLOR_BLACK);
-    init_pair(c_box,    COLOR_YELLOW,   COLOR_BLACK);
+    init_pair(c_wall,       COLOR_BLUE,     COLOR_BLACK);
+    init_pair(c_space,      COLOR_BLACK,    COLOR_BLACK);
+    init_pair(c_life,       COLOR_GREEN,    COLOR_BLACK);
+    init_pair(c_life2,      COLOR_GREEN,    COLOR_BLACK);
+    init_pair(c_player,     COLOR_MAGENTA,  COLOR_BLACK);
+    init_pair(c_player2,    COLOR_WHITE,    COLOR_BLACK);
+    init_pair(c_bullet,     COLOR_GREEN,    COLOR_BLACK);
+    init_pair(c_bullet2,    COLOR_GREEN,    COLOR_BLACK);
+    init_pair(c_enemy,      COLOR_RED,      COLOR_BLACK);
+    init_pair(c_box,        COLOR_YELLOW,   COLOR_BLACK);
 }
 
 // Draw colored instance
@@ -674,7 +688,7 @@ void bullet2_collision(short current_lvl[][arr_size_x]) {
     // Kill Enemy
     if (bullet2_shoot) {
         for (int i = 0; i < sizeof(enemy)/sizeof(enemy[0]); i++) {
-            // Vertival collision
+            // Vertical
             if (enemy[i].ver != 0) {
                 if (bullet2.y == enemy[i].y &&
                     bullet2.x == enemy[i].x || 
@@ -689,7 +703,7 @@ void bullet2_collision(short current_lvl[][arr_size_x]) {
                 }
             }
 
-            // Horizontal collision
+            // Horizontal
             if (enemy[i].hor != 0) {
                 if (bullet2.y == enemy[i].y &&
                     bullet2.x == enemy[i].x || 
@@ -705,9 +719,9 @@ void bullet2_collision(short current_lvl[][arr_size_x]) {
             }
         }
 
-        // Check collision with player1
+        // Bala enemiga
         if (bullet2.y == player.y && bullet2.x == player.x) {
-            lifes = lifes - 1;  // Decrease player1's life
+            lifes = lifes - 1;
             bullet2_shoot = false;
         }
     }
@@ -764,7 +778,7 @@ void draw_level(short lvl[][arr_size_x]) {
         for (int x = 0; x < current_lvl_x; x++) {
             switch(lvl[y][x]) {
 
-                // Draw static object
+                // Objetos estaticos
                 case i_wall:   draw_instance(y, x, c_wall,  s_wall);  break;
                 case i_box:    draw_instance(y, x, c_box,   s_box);   break;
                 case i_space:  draw_instance(y, x, c_wall,  s_space); break;
@@ -772,22 +786,22 @@ void draw_level(short lvl[][arr_size_x]) {
                 case i_life2:  draw_instance(y, x, c_life2,  s_life2);  break;
                 case i_exit:   draw_instance(y, x, c_life,  s_exit);  break;
 
-                // Draw dynamic object
+                // Objetos Dinamicos
                 default:
 
-                    // Draw player
+                    // Jugador 1
                     if (x == player.x && y == player.y) {
                         draw_instance(y, x, c_player, player.symbol);
                         break;
                     }
 
-                    // Draw player2
+                    // Jugador 2
                     if (x == player2.x && y == player2.y) {
                         draw_instance(y, x, c_player2, player2.symbol);
                         break;
                     }
 
-                    // Draw bullet
+                    // Bala J1
                     if (x == bullet.x && y == bullet.y) {
                         if (!bullet_shoot) {
                             break;
@@ -795,7 +809,7 @@ void draw_level(short lvl[][arr_size_x]) {
                         draw_instance(y, x, c_bullet, bullet.symbol);
                     }
 
-                    // Draw bullet2
+                    // Bala J2
                     if (x == bullet2.x && y == bullet2.y) {
                         if (!bullet2_shoot) {
                             break;
@@ -803,7 +817,7 @@ void draw_level(short lvl[][arr_size_x]) {
                         draw_instance(y, x, c_bullet2, bullet2.symbol);
                     }
 
-                    // Draw enemy
+                    // Enemigo
                     for (int i = 0; i < 5; i++) {
                         if (x == enemy[i].x && y == enemy[i].y) {
                             draw_instance(y, x, c_enemy, s_enemy);
@@ -1146,7 +1160,7 @@ int main(void) {
                 mvprintw(h/2-len_yoff+2, w/2-len_xoff, "Puedes recuperar vida si recoges paquetes de vida");
                 mvprintw(h/2-len_yoff+3, w/2-len_xoff, "El mejor de 7 rondas gana");
                 mvprintw(h/2-len_yoff+4, w/2-len_xoff, "Disfruten");
-                mvprintw(h-4, w/2-ceil(len_xoff/2), "press 'q' to exit menu");
+                mvprintw(h-4, w/2-ceil(len_xoff/2), "Presiones 'q' para regresar");
                 box(stdscr, 0, 0);
             break;
             case STATE_GAME:
