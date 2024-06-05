@@ -1,14 +1,10 @@
-/**
- * Inludes
-*/
+// includes
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <ncurses.h>
 
-/**
- * Teclas
-*/
+// teclas
 #define vk_space  32
 #define vk_enter  10
 #define vk_f 102
@@ -18,9 +14,7 @@ int key_pressed = 0;
 #define KEY_S 115 // ASCII value for 's'
 #define KEY_D 100 // ASCII value for 'd'
 
-/**
- * Colores
-*/
+//colores
 const short c_wall   = 1;
 const short c_space  = 4;
 const short c_life   = 5;
@@ -33,14 +27,10 @@ const short c_enemy  = 7;
 const short c_box    = 8;
 const short c_hud    = 1;
 
-/**
- * Check
-*/
-bool EXIT = false;
 
-/**
- * Variables
-*/
+
+// Variables
+bool EXIT = false;
 short level = 1;
 short lifes = 3;
 short lifes2 = 3;
@@ -48,24 +38,13 @@ short wins1 = 0;
 short wins2 = 0;
 int bullet_shoot = false;
 int bullet2_shoot = false;
-
-/**
- * Tamaños mapas
-*/
 int current_lvl_x;
 int current_lvl_y;
-
-/**
- * Ancho y largo ventana
-*/
 int w, h;
-
 static int len_xoff = 31;
 static int len_yoff = 2;
 
-/**
- * Codigo elementos de mapa
-*/
+// codigo elementos de mapas
 #define i_wall      1
 #define i_life2     2
 #define i_space     3
@@ -75,9 +54,7 @@ static int len_yoff = 2;
 #define i_box       7
 #define i_enemy_h   8
 
-/**
- * Menu
-*/
+// arte de menu
 const char *menu_logo[7] = {
     " _____  __  __  ____  __      __    _    _ ",
     "(  _  )(  )(  )(_  _)(  )    /__\  ( \/\/ )",
@@ -89,7 +66,7 @@ const char *menu_logo[7] = {
 };
 
 /**
- * getter de size
+ * Funcion para actualizar los NPC´s
 */
 int str_len(const char* str) {
     int size = 0;
@@ -97,11 +74,11 @@ int str_len(const char* str) {
     return size;
 }
 
-/**
- * getter tamaño menu logo
-*/
 int logo_h_size = sizeof(menu_logo)/sizeof(menu_logo[0]);
 
+/**
+ * Funcion para obtener el tamaño del logo
+*/
 int get_logo_w_size(void) {
     int logo_w_size = 1;
 
@@ -115,7 +92,7 @@ int get_logo_w_size(void) {
 }
 
 /**
- * Dibujar logo
+ * Funcion para dibujar en consola el logo del juego
 */
 int logo_w_size = 1;
 void draw_logo(int h, int w) {
@@ -335,11 +312,11 @@ short lvl_six[lvl_six_y][lvl_six_x] = {
 /**
  * Nivel 7
 */
-#define lvl_win_x 27
-#define lvl_win_y 20
-#define level_win_size lvl_win_x
+#define lvl_last_x 27
+#define lvl_last_y 20
+#define level_last_size lvl_last_x
 
-short lvl_win[lvl_win_y][lvl_win_x] = {
+short lvl_last[lvl_last_y][lvl_last_x] = {
     { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
     { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
     { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
@@ -363,10 +340,9 @@ short lvl_win[lvl_win_y][lvl_win_x] = {
 };
 
 
-//////////////////
-//  COLORSHEME
-//////////////////
-// Set color
+/**
+ * Funcion para asignar colores
+*/
 void SetColor() {
     start_color();
     init_pair(c_wall,   COLOR_BLUE,     COLOR_BLACK);
@@ -385,6 +361,9 @@ void SetColor() {
 #define td_indent 2 // Top & down ident
 #define symbol_count 3
 
+/**
+ * Funcion para dibujar elementos
+*/
 void draw_instance(int y, int x, int color, char name[]) {
     attron(COLOR_PAIR(color));
 
@@ -404,64 +383,68 @@ void draw_instance(int y, int x, int color, char name[]) {
     attroff(COLOR_PAIR(color));
 }
 
-//////////////
-// OBJECT 
-//////////////
-
-// Class
+/**
+ * Struct base de objetos del juego
+*/
 struct class_obj {
     char symbol[20];
-    int hsp, vsp;
+    int hor, ver;
     int x, y;
     int direction;
 };
 
-// Create objects
+// structs a utilizar
 struct class_obj player = {};
 struct class_obj player2 = {};
 struct class_obj bullet = {};
 struct class_obj bullet2 = {};
 struct class_obj enemy[5]={};
 
-// Enemy movement
+/**
+ * Funcion para el movimineto de los NPC´s
+*/
 void enemy_move(short current_lvl[][arr_size_x], int index) {
         if (enemy[index].direction == 1 || enemy[index].direction == -1)  {
-            // VSP
-            if (current_lvl[enemy[index].y + enemy[index].vsp][enemy[index].x] == i_wall || 
-                current_lvl[enemy[index].y + enemy[index].vsp][enemy[index].x] == i_box)
+            // movimiento vertical
+            if (current_lvl[enemy[index].y + enemy[index].ver][enemy[index].x] == i_wall || 
+                current_lvl[enemy[index].y + enemy[index].ver][enemy[index].x] == i_box)
             {
                 enemy[index].direction *= -1;
             }
             
-            enemy[index].vsp = 1 * enemy[index].direction;
-            enemy[index].y += enemy[index].vsp;
+            enemy[index].ver = 1 * enemy[index].direction;
+            enemy[index].y += enemy[index].ver;
             
             return;
         }
 
         if (enemy[index].direction == 2 || enemy[index].direction == -2){
-            // HSP
-            if (current_lvl[enemy[index].y][enemy[index].x + enemy[index].hsp] == i_wall || 
-                current_lvl[enemy[index].y][enemy[index].x + enemy[index].hsp] == i_box)
+            // movimiento horizontal
+            if (current_lvl[enemy[index].y][enemy[index].x + enemy[index].hor] == i_wall || 
+                current_lvl[enemy[index].y][enemy[index].x + enemy[index].hor] == i_box)
             {
                 enemy[index].direction *= -1;
             }
 
-            enemy[index].hsp = 1 * enemy[index].direction;
-            enemy[index].x += enemy[index].hsp;
+            enemy[index].hor = 1 * enemy[index].direction;
+            enemy[index].x += enemy[index].hor;
 
             return;
         }
 }
 
-// Enemy update
+/**
+ * Funcion para actualizar los NPC´s
+*/
 void enemy_update(short current_lvl[][arr_size_x]) {
     for (int i = 0; i < sizeof(enemy)/sizeof(enemy[0]); i++) {
         enemy_move(current_lvl, i);
     }
 }
 
-// Enemy clear
+/**
+ * Funcion para limpiar enemigos de la pantalla
+*/
 void clear_enemy() {
     for (int i = 0; i < sizeof(enemy)/sizeof(enemy[0]); i++) {
         enemy[i].y = 0;
@@ -470,7 +453,9 @@ void clear_enemy() {
     }
 }
 
-// set obj Parametrs
+/**
+ * Funcion para inicializar objetos
+*/
 void obj_init(struct class_obj *obj, int x, int y, int dir, char *objname) {
     obj->x = x;
     obj->y = y;
@@ -478,26 +463,26 @@ void obj_init(struct class_obj *obj, int x, int y, int dir, char *objname) {
     strcpy(obj->symbol, objname);
 }
 
-/////////////
-// PLAYER 1
-////////////
-// Playes method move
+//------------------------------------------------------------------------------------------------------------------------------------------------
+
+// variables jugador 1
 int dir_x;
 int dir_y;
 int dir_shoot;
 
+/**
+ * Funcion para gestionar las colisiones del jugador 1
+*/
 void player_move(int key) {
-    // Key check
+    // validacion tecla
     int key_left  = ( key == KEY_LEFT  ) ? 1 : 0;
     int key_right = ( key == KEY_RIGHT ) ? 1 : 0;
     int key_down  = ( key == KEY_DOWN  ) ? 1 : 0;
     int key_up    = ( key == KEY_UP    ) ? 1 : 0;
-
-    // key dir
+    // direccion
     dir_x = key_right - key_left;
     dir_y = key_down  - key_up;
-
-    // Animation and direction shoot
+    // animacion
     if (dir_x == 0 && dir_y == 0) {
         strcpy(player.symbol, "|0|");
     } else {
@@ -506,40 +491,34 @@ void player_move(int key) {
         if ( dir_y == -1 ) { dir_shoot = -2; strcpy(player.symbol, "/0\\" ); }
         if ( dir_y ==  1 ) { dir_shoot =  2; strcpy(player.symbol, "\\0/" ); }
     }
-
-    player.hsp = 1 * dir_x;
-    player.vsp = 1 * dir_y;
-
-    if (player.hsp != 0) {
-        player.vsp = 0;
-    } else if (player.vsp != 0) {
-        player.hsp = 0;
+    player.hor = 1 * dir_x;
+    player.ver = 1 * dir_y;
+    if (player.hor != 0) {
+        player.ver = 0;
+    } else if (player.ver != 0) {
+        player.hor = 0;
     }
-
-    player.x += player.hsp;
-    player.y += player.vsp;
+    player.x += player.hor;
+    player.y += player.ver;
 }
 
-// Collsiion
+/**
+ * Funcion para gestionar las colisiones del jugador 1
+*/
 void player_collision(short current_lvl[][arr_size_x]) {
     switch(current_lvl[player.y][player.x]) {
-        
-        // Collision
-        case i_wall:    // wall
-        case i_box:     // box
-        case i_space:   // space
-            player.x -= player.hsp;
-            player.y -= player.vsp;
+        case i_wall:    
+        case i_box:     
+        case i_space:   
+            player.x -= player.hor;
+            player.y -= player.ver;
         break;
-
-        // key
         case i_life:
             current_lvl[player.y][player.x] = 0;
             lifes = lifes + 1;
         break;
     }
-
-    // Enemy collision
+    // Enemigo
     for (short i = 0; i < sizeof(enemy)/sizeof(enemy[0]); i++) {
         if (player.y == enemy[i].y &&
             player.x == enemy[i].x)
@@ -547,29 +526,28 @@ void player_collision(short current_lvl[][arr_size_x]) {
             lifes = lifes - 1; 
         }
     }
-
 }
 
-/////////////
-// PLAYER 2
-////////////
-// Playes method move
+// variables jugador 1
 int dir2_x;
 int dir2_y;
 int dir2_shoot;
 
+/**
+ * Funcion para gestionar las colisiones del jugador 1
+*/
 void player2_move(int key) {
-    // Key check
+    // validacion tecla
     int key_left2  = ( key == KEY_A  ) ? 1 : 0;
     int key_right2 = ( key == KEY_D ) ? 1 : 0;
     int key_down2 = ( key == KEY_S  ) ? 1 : 0;
     int key_up2    = ( key == KEY_W    ) ? 1 : 0;
 
-    // key dir
+    // direccion
     dir2_x = key_right2 - key_left2;
     dir2_y = key_down2  - key_up2;
 
-    // Animation and direction shoot
+    // animacion 
     if (dir2_x == 0 && dir2_y == 0) {
         strcpy(player2.symbol, "|X|");
     } else {
@@ -579,39 +557,36 @@ void player2_move(int key) {
         if ( dir2_y ==  1 ) { dir2_shoot =  2; strcpy(player2.symbol, "\\X/" ); }
     }
 
-    player2.hsp = 1 * dir2_x;
-    player2.vsp = 1 * dir2_y;
+    player2.hor = 1 * dir2_x;
+    player2.ver = 1 * dir2_y;
 
-    if (player2.hsp != 0) {
-        player2.vsp = 0;
-    } else if (player2.vsp != 0) {
-        player2.hsp = 0;
+    if (player2.hor != 0) {
+        player2.ver = 0;
+    } else if (player2.ver != 0) {
+        player2.hor = 0;
     }
 
-    player2.x += player2.hsp;
-    player2.y += player2.vsp;
+    player2.x += player2.hor;
+    player2.y += player2.ver;
 }
 
-// Collsiion
+/**
+ * Funcion para manejar las colisiones del jugador 2
+*/
 void player2_collision(short current_lvl[][arr_size_x]) {
     switch(current_lvl[player2.y][player2.x]) {
-        
-        // Collision
-        case i_wall:    // wall
-        case i_box:     // box
-        case i_space:   // space
-            player2.x -= player2.hsp;
-            player2.y -= player2.vsp;
+        case i_wall:    
+        case i_box:     
+        case i_space: 
+            player2.x -= player2.hor;
+            player2.y -= player2.ver;
         break;
-
-        // key
         case i_life2:
             current_lvl[player2.y][player2.x] = 0;
             lifes2 = lifes2 + 1;
         break;
     }
-
-    // Enemy collision
+    // Enemigo
     for (short i = 0; i < sizeof(enemy)/sizeof(enemy[0]); i++) {
         if (player2.y == enemy[i].y &&
             player2.x == enemy[i].x)
@@ -619,13 +594,12 @@ void player2_collision(short current_lvl[][arr_size_x]) {
             lifes2 = lifes2 - 1; 
         }
     }
-
 }
 
 
-/////////////
-// BULLET
-////////////
+/**
+ *  Funcion para manejar las colisiones de las balas del jugador 1
+*/
 void bullet_collision(short current_lvl[][arr_size_x]) {
     switch(current_lvl[bullet.y][bullet.x]) {
         case i_wall:
@@ -633,18 +607,15 @@ void bullet_collision(short current_lvl[][arr_size_x]) {
             bullet_shoot = false;
         break;
     }
-
-    // Kill Box
+    // fin del recorrido sin colision
     if (current_lvl[bullet.y][bullet.x] == i_box) {
         current_lvl[bullet.y][bullet.x] = 0;
         bullet_shoot = false;
     }
-
-    // Kill Enemy
     if (bullet_shoot) {
         for (int i = 0; i < sizeof(enemy)/sizeof(enemy[0]); i++) {
-            // Vertival collision
-            if (enemy[i].vsp != 0) {
+            // 
+            if (enemy[i].ver != 0) {
                 if (bullet.y == enemy[i].y &&
                     bullet.x == enemy[i].x || 
                     bullet.y - enemy[i].direction == enemy[i].y &&
@@ -659,7 +630,7 @@ void bullet_collision(short current_lvl[][arr_size_x]) {
             }
 
             // Horizontal collision
-            if (enemy[i].hsp != 0) {
+            if (enemy[i].hor != 0) {
                 if (bullet.y == enemy[i].y &&
                     bullet.x == enemy[i].x || 
                     bullet.y == enemy[i].y &&
@@ -676,16 +647,16 @@ void bullet_collision(short current_lvl[][arr_size_x]) {
 
         // Check collision with player2
         if (bullet.y == player2.y && bullet.x == player2.x) {
-            lifes2 = lifes2 - 1;  // Decrease player2's life
+            lifes2 = lifes2 - 1;
             bullet_shoot = false;
         }
     }
 
 }
 
-/////////////
-// BULLET 2
-////////////
+/**
+ *  Funcion para manejar las colisiones de las balas del jugador 2
+*/
 void bullet2_collision(short current_lvl[][arr_size_x]) {
     switch(current_lvl[bullet2.y][bullet2.x]) {
         case i_wall:
@@ -704,7 +675,7 @@ void bullet2_collision(short current_lvl[][arr_size_x]) {
     if (bullet2_shoot) {
         for (int i = 0; i < sizeof(enemy)/sizeof(enemy[0]); i++) {
             // Vertival collision
-            if (enemy[i].vsp != 0) {
+            if (enemy[i].ver != 0) {
                 if (bullet2.y == enemy[i].y &&
                     bullet2.x == enemy[i].x || 
                     bullet2.y - enemy[i].direction == enemy[i].y &&
@@ -719,7 +690,7 @@ void bullet2_collision(short current_lvl[][arr_size_x]) {
             }
 
             // Horizontal collision
-            if (enemy[i].hsp != 0) {
+            if (enemy[i].hor != 0) {
                 if (bullet2.y == enemy[i].y &&
                     bullet2.x == enemy[i].x || 
                     bullet2.y == enemy[i].y &&
@@ -743,11 +714,9 @@ void bullet2_collision(short current_lvl[][arr_size_x]) {
 
 }
 
-
-/////////////
-// LEVELS
-////////////
-// Set enemy
+/**
+ *  Funcion para actualizar el nivel
+*/
 void set_lvl_param(short current_lvl[][arr_size_x], int clx, int cly) {
     static int i = 0;
     for (int y = 0; y < cly; y++) {
@@ -769,7 +738,9 @@ void set_lvl_param(short current_lvl[][arr_size_x], int clx, int cly) {
 }
 
 
-// Check next lvl
+/**
+ *  Funcion para revisar si hay que hacer cambio de nivel
+*/
 bool next_lvl(short current_lvl[][arr_size_x]) {
     if (lifes == 0 || lifes2 == 0) {
         if (lifes == 0){
@@ -785,7 +756,9 @@ bool next_lvl(short current_lvl[][arr_size_x]) {
     return false;
 }
 
-// Draw Current Level
+/**
+ *  Funcion para dibujar en consola el nivel
+*/
 void draw_level(short lvl[][arr_size_x]) {
     for (int y = 0; y < current_lvl_y; y++) {
         for (int x = 0; x < current_lvl_x; x++) {
@@ -844,16 +817,16 @@ void draw_level(short lvl[][arr_size_x]) {
     }
 }
 
-//////////////
-// GAME
-/////////////
-
-// Hud
+/**
+ *  Funcion para dibujar el HUD
+*/
 void draw_hud() {
     mvprintw(1, 2, "Player 1 HP: %d   Player 2 HP: %d   level: %d   Player 1 Points: %d   Player 2 Points: %d\n", lifes, lifes2, level, wins1, wins2);
 }
 
-// Game Over
+/**
+ *  Funcion para gestionar el Game Over
+*/
 void game_over() {
     EXIT = true;
     endwin();
@@ -865,8 +838,10 @@ void game_over() {
     }
 }
 
+/**
+ *  Funcion para actualizar la bala del jugador 1
+*/
 void bullet_update(void) {
-    // Shoot
     if (!bullet_shoot) {
             bullet.x = player.x;
             bullet.y = player.y;
@@ -877,33 +852,35 @@ void bullet_update(void) {
     } else {
         switch(bullet.direction) {
             case 1:
-                bullet.hsp = 1;
-                bullet.vsp = 0;
+                bullet.hor = 1;
+                bullet.ver = 0;
             break;
 
             case -1:
-                bullet.hsp = -1;
-                bullet.vsp = 0;
+                bullet.hor = -1;
+                bullet.ver = 0;
             break;
 
             case 2:
-                bullet.hsp = 0;
-                bullet.vsp = 1;
+                bullet.hor = 0;
+                bullet.ver = 1;
             break;
 
             case -2:
-                bullet.hsp = 0;
-                bullet.vsp = -1;
+                bullet.hor = 0;
+                bullet.ver = -1;
             break;
         }
 
-        bullet.x += bullet.hsp;
-        bullet.y += bullet.vsp;
+        bullet.x += bullet.hor;
+        bullet.y += bullet.ver;
     }
 }
 
+/**
+ *  Funcion para actualizar la bala del jugador 2
+*/
 void bullet2_update(void) {
-    // Shoot
     if (!bullet2_shoot) {
             bullet2.x = player2.x;
             bullet2.y = player2.y;
@@ -914,55 +891,50 @@ void bullet2_update(void) {
     } else {
         switch(bullet2.direction) {
             case 1:
-                bullet2.hsp = 1;
-                bullet2.vsp = 0;
+                bullet2.hor = 1;
+                bullet2.ver = 0;
             break;
 
             case -1:
-                bullet2.hsp = -1;
-                bullet2.vsp = 0;
+                bullet2.hor = -1;
+                bullet2.ver = 0;
             break;
 
             case 2:
-                bullet2.hsp = 0;
-                bullet2.vsp = 1;
+                bullet2.hor = 0;
+                bullet2.ver = 1;
             break;
 
             case -2:
-                bullet2.hsp = 0;
-                bullet2.vsp = -1;
+                bullet2.hor = 0;
+                bullet2.ver = -1;
             break;
         }
 
-        bullet2.x += bullet2.hsp;
-        bullet2.y += bullet2.vsp;
+        bullet2.x += bullet2.hor;
+        bullet2.y += bullet2.ver;
     }
 }
 
-// Update game
+/**
+ *  Funcion para actualizar el juego en general
+*/
 void game_update(int key, short current_lvl[][arr_size_x]) {
-    // Player1
     player_move(key);
     player_collision(current_lvl);
-
-    // Player2
     player2_move(key);
     player2_collision(current_lvl);
-
-    // Enemy
     enemy_update(current_lvl);
-
-    // Bullet
     bullet_update();
     bullet_collision(current_lvl);
     bullet2_update();
     bullet2_collision(current_lvl);
-
-    // Draw map
     draw_level(current_lvl);
 }
 
-// Init lvl
+/**
+ *  Funcion para actualizar la bala del jugador 1
+*/
 void level_init(short index_lvl) {
     static bool init = true;
 
@@ -973,7 +945,7 @@ void level_init(short index_lvl) {
         if (index_lvl == 4) { init = next_lvl(lvl_fo);    game_update(key_pressed, lvl_fo);    }
         if (index_lvl == 5) { init = next_lvl(lvl_five);  game_update(key_pressed, lvl_five);  }
         if (index_lvl == 6) { init = next_lvl(lvl_six);   game_update(key_pressed, lvl_six);   }
-        if (index_lvl == 7) { init = next_lvl(lvl_win);   game_update(key_pressed, lvl_win);   }
+        if (index_lvl == 7) { init = next_lvl(lvl_last);   game_update(key_pressed, lvl_last);   }
         
         return;
     }
@@ -1074,20 +1046,21 @@ void level_init(short index_lvl) {
             player.y = 2;
             player2.x = 19;
             player2.y = 15;
+            clear_enemy();
+            set_lvl_param(lvl_last, current_lvl_x, current_lvl_y);
             init = false;
+        break;
+        case 8:
             game_over();
         break;
     }
+
 }
 
-
-
-///////////////
-// MAIN
-//////////////
+/**
+ *  Funcion main del programa donde se llaman a todas las otras funciones
+*/
 int main(void) {
-
-    // Start curses mode
     initscr();
     keypad(stdscr, TRUE);
     savetty();
@@ -1096,16 +1069,10 @@ int main(void) {
     timeout(0);
     leaveok(stdscr, TRUE);
     curs_set(0);
-
-    // if not support color
     if (!has_colors()) {
         endwin();
-        printf("Your terminal does not support color\n");
+        printf("Error con los colores a manipular\n");
     }
-
-    ////////////////////
-    // Enum game state
-    ///////////////////
     typedef enum {
         STATE_MENU,
         STATE_INFO,
@@ -1113,96 +1080,50 @@ int main(void) {
         STATE_EXIT,
     } game_states;
 
-    // Init current state
     game_states current_state;
     current_state = STATE_MENU;
-
-
-    //////////////
-    // init obj
-    //////////////
-    // Player
     obj_init(&player, 5 /* x pos */, 5 /* y pos */, 0, "|O|");
-
-    // Player2
     obj_init(&player2, 2 /* x pos */, 2 /* y pos */, 0, "|X|");
-
-    // Bullet
     obj_init(&bullet, player.x, player.x, 0, " * ");
-
-    // Bullet
     obj_init(&bullet2, player2.x, player2.x, 0, " * ");
-
-    ////////////////
-    // Main loop
-    ///////////////
-
-    // Menu item
-    // Item start game
+    // Efecto Start Game
     const char *item_start_game[2] = {
         "> START GAME <",
         "start game",
     };
-
-    // Item info
+    // Efecto Item
     const char *item_info[2] = {
         "> INFO <",
         "info",
     };
-
-    // Item exit
+    // Efecto Exit
     const char *item_exit[2] = {
         "> EXIT <",
         "exit",
     };
-
     while (!EXIT) {
-
-        // Color
         SetColor();
-
-        // Get window width & Height
         getmaxyx(stdscr, h, w);
-
-        // Menu state
         static int menu_item = 0;
         if (key_pressed == KEY_UP)   menu_item--;
         if (key_pressed == KEY_DOWN) menu_item++;
-
         if (menu_item >= 2) menu_item = 2;
         if (menu_item <= 0) menu_item = 0;
-
-        // In menu state
         switch(current_state) {
-            // Menu
             case STATE_MENU:
-                // Logo
                 draw_logo(h, w);
-
-                ///////////
-                // Items
-                //////////
-                // Item start game
                 int select_start_game = menu_item == 0 ? 0 : 1;
                 mvprintw(h/2 - logo_h_size + 9, w/2 - str_len(item_start_game[select_start_game])/2, item_start_game[select_start_game]);
-
-                // Item info
                 int select_info = menu_item == 1 ? 0 : 1;
                 mvprintw(h/2 - logo_h_size + 11, w/2 - str_len(item_info[select_info])/2, item_info[select_info]);
-
-                // Item exit
                 int select_exit = menu_item == 2 ? 0 : 1;
                 mvprintw(h/2 - logo_h_size + 13, w/2 - str_len(item_exit[select_exit])/2, item_exit[select_exit]);
-
-                // By dev
                 mvprintw(h-2, 2, "Arquitecura de Computadores IS 2024");
-
-                // Draw box
+                // caja del hud
                 attron(COLOR_PAIR(c_hud));
                 box(stdscr, 0, 0);
                 attron(COLOR_PAIR(c_hud));
 
-                // Click handler
                 if (key_pressed == vk_enter) { 
                     switch(menu_item) {
                         case 0:
@@ -1210,7 +1131,6 @@ int main(void) {
                         break;
 
                         case 1:
-                            // Info page is dev
                             current_state = STATE_INFO;
                         break;
 
@@ -1220,52 +1140,33 @@ int main(void) {
                     }
                 }
             break;
-
-            // Info
             case STATE_INFO:
-
                 mvprintw(h/2-len_yoff,   w/2-len_xoff, "Outlaw version Arqui ");
                 mvprintw(h/2-len_yoff+1, w/2-len_xoff, "Trata de bajar la vida de tu contrincante");
                 mvprintw(h/2-len_yoff+2, w/2-len_xoff, "Puedes recuperar vida si recoges paquetes de vida");
                 mvprintw(h/2-len_yoff+3, w/2-len_xoff, "El mejor de 7 rondas gana");
                 mvprintw(h/2-len_yoff+4, w/2-len_xoff, "Disfruten");
-
-                // To menu
                 mvprintw(h-4, w/2-ceil(len_xoff/2), "press 'q' to exit menu");
-
                 box(stdscr, 0, 0);
             break;
-
-            // Game
             case STATE_GAME:
                 level_init(level);
                 draw_hud();
                 box(stdscr, 0, 0);
             break;
-
-            // Exit
             case STATE_EXIT:
                 endwin();
                 EXIT = TRUE;
             break;
         }
-
-        // Exit to menu
         if (key_pressed == 'q')
             current_state = STATE_MENU;
 
-        // Get key pressed
         key_pressed = wgetch(stdscr);
         napms(100);
         key_pressed = wgetch(stdscr);
-
-        // Clear
         erase();
-
     }
-
-    // End curses mode
     endwin();
-
     return 0;
 }
